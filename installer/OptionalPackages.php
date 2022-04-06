@@ -170,10 +170,12 @@ class OptionalPackages
         if ($this->composerDefinition['type'] !== 'library') {
             return;
         }
+        // composer
         $analyse = $this->composerDefinition['scripts']['analyse'] ?? '';
         if ($analyse) {
             $this->composerDefinition['scripts']['analyse'] = str_replace(['/app', 'app/'], ['/src', 'src/'], $analyse);
         }
+        // config
         $configDir = $this->projectRoot . 'config';
         $this->walkDir($configDir, function ($filename) {
             $content = file_get_contents($filename);
@@ -189,6 +191,13 @@ class OptionalPackages
             }
             return str_replace(' ', '', ucwords($name));
         }, $names);
+        // .env
+        $envFile = $this->projectRoot . '.env.example';
+        $appName = implode('-', array_map('strtolower', $names));
+        $content = file_get_contents($envFile);
+        $content = str_replace('APP_NAME=skeleton', "APP_NAME=$appName", $content);
+        file_put_contents($envFile, $content);
+        // namespace
         $namespace = implode('\\', $names);
         $sourceDir = $this->projectRoot . 'app';
         $distDir = $this->projectRoot . 'src';
