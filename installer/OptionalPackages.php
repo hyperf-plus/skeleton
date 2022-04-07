@@ -186,14 +186,15 @@ class OptionalPackages
         $names = preg_split('/[^A-Za-z0-9_-]/', $package_name, -1, PREG_SPLIT_NO_EMPTY);
         $names = array_map(function ($name) {
             $name = preg_replace('/[^A-Za-z0-9]/', ' ', $name);
-            if (strcasecmp($name, 'uuoa') === 0) {
-                return 'UUOA';
+            $nameUpper = strtoupper($name);
+            if (in_array($nameUpper, ['UU', 'UUOA'])) {
+                return $nameUpper;
             }
             return str_replace(' ', '', ucwords($name));
         }, $names);
         // .env
         $envFile = $this->projectRoot . '.env.example';
-        $appName = implode('-', array_map('strtolower', $names));
+        $appName = strtolower(implode('-', $names));
         $content = file_get_contents($envFile);
         $content = str_replace('APP_NAME=skeleton', "APP_NAME=$appName", $content);
         file_put_contents($envFile, $content);
