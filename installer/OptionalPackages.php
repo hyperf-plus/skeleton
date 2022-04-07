@@ -179,7 +179,7 @@ class OptionalPackages
         $configDir = $this->projectRoot . 'config';
         $this->walkDir($configDir, function ($filename) {
             $content = file_get_contents($filename);
-            $content = str_replace(['/app', 'app/'], ['/src', 'src/'], $content);
+            $content = str_replace(['/app', "'app'", 'app/'], ['/src', "'src'", 'src/'], $content);
             file_put_contents($filename, $content);
         });
         $package_name = $this->composerDefinition['name'];
@@ -206,14 +206,14 @@ class OptionalPackages
             $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if ($ext == 'php') {
                 $content = file_get_contents($filename);
-                $content = str_replace('namespace App', "namespace {$namespace}", $content);
+                $content = str_replace('namespace App', "namespace $namespace", $content);
                 file_put_contents($filename, $content);
             }
         });
         $this->removeDir($distDir);
         rename($sourceDir, $distDir);
         unset($this->composerDefinition['autoload']['psr-4']['App\\']);
-        $this->composerDefinition['autoload']['psr-4'][$namespace] = 'src/';
+        $this->composerDefinition['autoload']['psr-4'][$namespace . '\\'] = 'src/';
         $helper = 'src/helper/helper.php';
         $this->copyResource('resources/helper/helper.php', $helper);
         $this->composerDefinition['autoload']['files'][] = $helper;
