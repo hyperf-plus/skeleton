@@ -124,13 +124,13 @@ class OptionalPackages
         $basename = basename($this->projectRoot);
         $package_name = sprintf('uuoa/%s', strtolower($basename));
         $ask[] = "\n  <question>What package name (<vendor>/<name>) do you want to setup ?</question>\n";
-        $ask[] = "  [<comment>n</comment>] Default name $package_name\n";
-        $ask[] = "Make your selection or type a package name, like $package_name (n):\n";
+        $ask[] = "  [<comment>n</comment>] Default name {$package_name}\n";
+        $ask[] = "Make your selection or type a package name, like {$package_name} (n):\n";
         $answer = $this->io->askAndValidate(
             implode('', $ask),
             function ($value) use ($package_name) {
                 if ($value === 'y' || $value === 'yes') {
-                    throw new \InvalidArgumentException("You should type a package name, like $package_name. Or type n to skip.");
+                    throw new \InvalidArgumentException("You should type a package name, like {$package_name}. Or type n to skip.");
                 }
                 return trim($value);
             },
@@ -153,8 +153,8 @@ class OptionalPackages
         $answer = $this->io->askAndValidate(
             implode('', $ask),
             function ($value) {
-                if (!in_array($value, ['n', 'library', 'project', '1', '2'])) {
-                    throw new \InvalidArgumentException("You should selection a package type, like 1. Or type n to skip.");
+                if (! in_array($value, ['n', 'library', 'project', '1', '2'])) {
+                    throw new \InvalidArgumentException('You should selection a package type, like 1. Or type n to skip.');
                 }
                 return trim($value);
             },
@@ -196,7 +196,7 @@ class OptionalPackages
         $envFile = $this->projectRoot . '.env.example';
         $appName = strtolower(implode('-', $names));
         $content = file_get_contents($envFile);
-        $content = str_replace('APP_NAME=skeleton', "APP_NAME=$appName", $content);
+        $content = str_replace('APP_NAME=skeleton', "APP_NAME={$appName}", $content);
         file_put_contents($envFile, $content);
         // namespace
         $namespace = implode('\\', $names);
@@ -206,7 +206,7 @@ class OptionalPackages
             $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if ($ext == 'php') {
                 $content = file_get_contents($filename);
-                $content = str_replace('namespace App', "namespace $namespace", $content);
+                $content = str_replace('namespace App', "namespace {$namespace}", $content);
                 file_put_contents($filename, $content);
             }
         });
@@ -217,39 +217,6 @@ class OptionalPackages
         $helper = 'src/helper/helper.php';
         $this->copyResource('resources/helper/helper.php', $helper);
         $this->composerDefinition['autoload']['files'][] = $helper;
-    }
-
-    private function removeDir(string $directory)
-    {
-        if (is_file($directory)) {
-            unlink($directory);
-        } elseif (is_dir($directory)) {
-            $files = scandir($directory);
-            foreach ($files as $file) {
-                if (in_array($file, ['.', '..'])) {
-                    continue;
-                }
-                $filename = sprintf('%s%s%s', $directory, DIRECTORY_SEPARATOR, $file);
-                $this->removeDir($filename);
-            }
-            rmdir($directory);
-        }
-    }
-
-    private function walkDir(string $directory, callable $callback)
-    {
-        $files = scandir($directory);
-        foreach ($files as $file) {
-            if (in_array($file, ['.', '..'])) {
-                continue;
-            }
-            $filename = sprintf('%s%s%s', $directory, DIRECTORY_SEPARATOR, $file);
-            if (is_dir($filename)) {
-                $this->walkDir($filename, $callback);
-            } elseif (is_file($filename)) {
-                call_user_func($callback, $filename);
-            }
-        }
     }
 
     public function installHyperfScript()
@@ -504,6 +471,39 @@ class OptionalPackages
             return preg_quote($word, '/');
         }, $entries));
         return preg_replace('/^.*(?:' . $entries . ").*$(?:\r?\n)?/m", '', $content);
+    }
+
+    private function removeDir(string $directory)
+    {
+        if (is_file($directory)) {
+            unlink($directory);
+        } elseif (is_dir($directory)) {
+            $files = scandir($directory);
+            foreach ($files as $file) {
+                if (in_array($file, ['.', '..'])) {
+                    continue;
+                }
+                $filename = sprintf('%s%s%s', $directory, DIRECTORY_SEPARATOR, $file);
+                $this->removeDir($filename);
+            }
+            rmdir($directory);
+        }
+    }
+
+    private function walkDir(string $directory, callable $callback)
+    {
+        $files = scandir($directory);
+        foreach ($files as $file) {
+            if (in_array($file, ['.', '..'])) {
+                continue;
+            }
+            $filename = sprintf('%s%s%s', $directory, DIRECTORY_SEPARATOR, $file);
+            if (is_dir($filename)) {
+                $this->walkDir($filename, $callback);
+            } elseif (is_file($filename)) {
+                call_user_func($callback, $filename);
+            }
+        }
     }
 
     /**
