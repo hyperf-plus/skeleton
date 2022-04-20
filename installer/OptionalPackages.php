@@ -193,10 +193,12 @@ class OptionalPackages
             return str_replace(' ', '', ucwords($name));
         }, $names);
         // .env
-        $envFile = $this->projectRoot . '.env.example';
+        $envFile = $this->projectRoot . '.env';
+        $envFileExample = $this->projectRoot . '.env.example';
         $appName = strtolower(implode('-', $names));
-        $content = file_get_contents($envFile);
+        $content = file_get_contents($envFileExample);
         $content = str_replace('APP_NAME=skeleton', "APP_NAME={$appName}", $content);
+        file_put_contents($envFileExample, $content);
         file_put_contents($envFile, $content);
         // namespace
         $namespace = implode('\\', $names);
