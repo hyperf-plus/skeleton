@@ -208,7 +208,7 @@ class OptionalPackages
             $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if ($ext == 'php') {
                 $content = file_get_contents($filename);
-                $content = str_replace('namespace App', "namespace {$namespace}", $content);
+                $content = str_replace(['namespace App', 'App\\'], ["namespace {$namespace}", "{$namespace}"], $content);
                 file_put_contents($filename, $content);
             }
         });
