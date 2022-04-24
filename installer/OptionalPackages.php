@@ -204,10 +204,11 @@ class OptionalPackages
         $this->removeDir($distDir);
         rename($sourceDir, $distDir);
         // config
+        $namespaceSlash = addslashes($namespace);
         $configDir = $this->projectRoot . 'config';
-        $this->walkDir($configDir, function ($filename) use ($namespace) {
+        $this->walkDir($configDir, function ($filename) use ($namespaceSlash) {
             $content = file_get_contents($filename);
-            $content = str_replace(['/app', "'app'", 'app/', 'App\\'], ['/src', "'src'", 'src/', "{$namespace}\\"], $content);
+            $content = str_replace(['/app', "'app'", 'app/', 'App\\\\'], ['/src', "'src'", 'src/', "{$namespaceSlash}\\\\"], $content);
             file_put_contents($filename, $content);
         });
         // composer
