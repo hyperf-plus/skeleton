@@ -171,17 +171,6 @@ class OptionalPackages
             return;
         }
         // composer
-        $analyse = $this->composerDefinition['scripts']['analyse'] ?? '';
-        if ($analyse) {
-            $this->composerDefinition['scripts']['analyse'] = str_replace(['/app', 'app/'], ['/src', 'src/'], $analyse);
-        }
-        // config
-        $configDir = $this->projectRoot . 'config';
-        $this->walkDir($configDir, function ($filename) {
-            $content = file_get_contents($filename);
-            $content = str_replace(['/app', "'app'", 'app/'], ['/src', "'src'", 'src/'], $content);
-            file_put_contents($filename, $content);
-        });
         $package_name = $this->composerDefinition['name'];
         $names = preg_split('/[^A-Za-z0-9_-]/', $package_name, -1, PREG_SPLIT_NO_EMPTY);
         $names = array_map(function ($name) {
@@ -214,6 +203,18 @@ class OptionalPackages
         });
         $this->removeDir($distDir);
         rename($sourceDir, $distDir);
+        // config
+        $configDir = $this->projectRoot . 'config';
+        $this->walkDir($configDir, function ($filename) use ($namespace) {
+            $content = file_get_contents($filename);
+            $content = str_replace(['/app', "'app'", 'app/', 'App\\'], ['/src', "'src'", 'src/', "{$namespace}\\"], $content);
+            file_put_contents($filename, $content);
+        });
+        // composer
+        $analyse = $this->composerDefinition['scripts']['analyse'] ?? '';
+        if ($analyse) {
+            $this->composerDefinition['scripts']['analyse'] = str_replace(['/app', 'app/'], ['/src', 'src/'], $analyse);
+        }
         unset($this->composerDefinition['autoload']['psr-4']['App\\']);
         $this->composerDefinition['autoload']['psr-4'][$namespace . '\\'] = 'src/';
         $helper = 'src/helper/helper.php';
