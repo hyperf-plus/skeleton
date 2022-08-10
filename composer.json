@@ -22,6 +22,7 @@
         "hyperf/http-server": "~3.0.0",
         "hyperf/logger": "~3.0.0",
         "hyperf/memory": "~3.0.0",
+        "hyperf-plus/route": "~3.0.0",
         "hyperf/process": "~3.0.0"
     },
     "require-dev": {
